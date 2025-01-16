@@ -1,3 +1,5 @@
-./target
+# Maven target directory
+/target
 
+# env
 .env
