@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_07sxe2y" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.29.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.22.0">
-  <bpmn:process id="Process_0tguoxa" name="recruitment-process" isExecutable="true">
+  <bpmn:process id="recruitment-process" name="recruitment-process" isExecutable="true" camunda:historyTimeToLive="10000">
     <bpmn:startEvent id="StartEvent_1" name="start process; submit applicaiton" camunda:formKey="embedded:app:forms/application_form.html">
       <bpmn:outgoing>Flow_0nhr7lu</bpmn:outgoing>
       <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_0il8iu1">
@@ -66,7 +66,7 @@ Task details: ${role}.
     <bpmn:boundaryEvent id="Event_1cdjzdt" attachedToRef="Activity_0mgn43b">
       <bpmn:outgoing>Flow_1f0nhpf</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_0ubtue5">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT10S</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT120S</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="Flow_1f0nhpf" name="assignment not completed in time" sourceRef="Event_1cdjzdt" targetRef="Gateway_0pnej60">
@@ -76,12 +76,7 @@ Task details: ${role}.
         </camunda:properties>
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:exclusiveGateway id="Gateway_09m48xh">
-      <bpmn:incoming>Flow_1xk7jj0</bpmn:incoming>
-      <bpmn:outgoing>Flow_0d96q6r</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_1xk7jj0" sourceRef="Activity_0hq4hqs" targetRef="Gateway_09m48xh" />
-    <bpmn:sequenceFlow id="Flow_0d96q6r" sourceRef="Gateway_09m48xh" targetRef="Activity_0mgn43b" />
+    <bpmn:sequenceFlow id="Flow_1xk7jj0" sourceRef="Activity_0hq4hqs" targetRef="Activity_0mgn43b" />
     <bpmn:sequenceFlow id="Flow_1648bzm" sourceRef="Event_0belaay" targetRef="Activity_1k0tp1b" />
     <bpmn:sendTask id="Activity_1k0tp1b" name="assignment reminder" camunda:class="com.synhrgy.recruitement.MailDelegate">
       <bpmn:extensionElements>
@@ -107,10 +102,8 @@ This is a reminder to complete the task assigned to you. Please log in to your p
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isShortlisted== true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:receiveTask id="Activity_0mgn43b" name="complete tasks" messageRef="Message_0m76e85">
-      <bpmn:extensionElements>
-        <camunda:executionListener class="" event="start" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0d96q6r</bpmn:incoming>
+      <bpmn:extensionElements />
+      <bpmn:incoming>Flow_1xk7jj0</bpmn:incoming>
       <bpmn:outgoing>Flow_1ddw5l8</bpmn:outgoing>
     </bpmn:receiveTask>
     <bpmn:exclusiveGateway id="Gateway_0vo7ygx" name="accepted?">
@@ -164,7 +157,7 @@ This is a reminder to complete the task assigned to you. Please log in to your p
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1e9v25x" sourceRef="Activity_014gt6w" targetRef="Gateway_0z5efjo" />
     <bpmn:sequenceFlow id="Flow_1h8mo0g" sourceRef="Gateway_19x9ipj" targetRef="Gateway_0z5efjo">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${areDocsApproved== true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${areDocsApproved== false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1n12nlq" sourceRef="Gateway_0z5efjo" targetRef="Activity_146vhpf" />
     <bpmn:sequenceFlow id="Flow_16n51qr" sourceRef="Activity_1mm1xc1" targetRef="Gateway_19x9ipj" />
@@ -194,7 +187,12 @@ This is a reminder to complete the task assigned to you. Please log in to your p
     <bpmn:sendTask id="Activity_0ufsdak" name="proceed interviews" camunda:class="com.synhrgy.recruitement.MailDelegate">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="mailSubject" />
+          <camunda:inputParameter name="mailSubject">"Your Upcoming Interview"</camunda:inputParameter>
+          <camunda:inputParameter name="mailBody">Dear ${last_name},
+We are excited to move forward with your application for the ${role} role. As part of the next steps, we would like to schedule an interview with you.
+
+Please choose a convenient time from the available slots.
+To confirm your preferred time, please reply to this email or use the scheduling link provided</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_108wd5h</bpmn:incoming>
@@ -203,7 +201,7 @@ This is a reminder to complete the task assigned to you. Please log in to your p
     <bpmn:boundaryEvent id="Event_0belaay" cancelActivity="false" attachedToRef="Activity_0mgn43b">
       <bpmn:outgoing>Flow_1648bzm</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_16p3nec">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5S</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT60S</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="Flow_1ddw5l8" sourceRef="Activity_0mgn43b" targetRef="Activity_01tffcl" />
@@ -227,7 +225,7 @@ This is a reminder to complete the task assigned to you. Please log in to your p
   <bpmn:message id="Message_06as6hk" name="docsAreAccepted" />
   <bpmn:message id="Message_2omgjkg" name="OnboardingDone" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_0tguoxa">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="recruitment-process">
       <bpmndi:BPMNShape id="Event_00t2q4v_di" bpmnElement="StartEvent_1">
         <dc:Bounds x="182" y="412" width="36" height="36" />
         <bpmndi:BPMNLabel>
@@ -254,9 +252,6 @@ This is a reminder to complete the task assigned to you. Please log in to your p
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0k03edm_di" bpmnElement="Activity_0hq4hqs">
         <dc:Bounds x="770" y="390" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_09m48xh_di" bpmnElement="Gateway_09m48xh" isMarkerVisible="true">
-        <dc:Bounds x="905" y="405" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1sndzb5_di" bpmnElement="Activity_1k0tp1b">
         <dc:Bounds x="1110" y="500" width="100" height="80" />
@@ -316,32 +311,31 @@ This is a reminder to complete the task assigned to you. Please log in to your p
       <bpmndi:BPMNShape id="Activity_005qsxe_di" bpmnElement="Activity_0svk97r">
         <dc:Bounds x="3530" y="390" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_10wphks_di" bpmnElement="Activity_0ufsdak">
-        <dc:Bounds x="1730" y="390" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_0psd3ph_di" bpmnElement="Activity_0vdxala">
+        <dc:Bounds x="1930" y="390" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0dospso_di" bpmnElement="Activity_01tffcl">
         <dc:Bounds x="1440" y="390" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0psd3ph_di" bpmnElement="Activity_0vdxala">
-        <dc:Bounds x="1930" y="390" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_10wphks_di" bpmnElement="Activity_0ufsdak">
+        <dc:Bounds x="1730" y="390" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_00rlvdi_di" bpmnElement="Activity_1mm1xc1">
-        <dc:Bounds x="2890" y="390" width="100" height="80" />
+        <dc:Bounds x="2900" y="390" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_0ccd89h_di" bpmnElement="Association_0ccd89h">
-        <di:waypoint x="1260" y="430" />
-        <di:waypoint x="1320" y="430" />
-        <di:waypoint x="1320" y="510" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0zr18yo_di" bpmnElement="Association_0zr18yo">
-        <di:waypoint x="1880" y="430" />
-        <di:waypoint x="1880" y="610" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Event_1dw1bln_di" bpmnElement="Event_1cdjzdt">
-        <dc:Bounds x="1012" y="372" width="36" height="36" />
+      <bpmndi:BPMNShape id="TextAnnotation_130cskq_di" bpmnElement="TextAnnotation_130cskq">
+        <dc:Bounds x="1270" y="510" width="99.99999794078421" height="98.51551956815113" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_04s1nn0_di" bpmnElement="TextAnnotation_04s1nn0">
+        <dc:Bounds x="1850" y="610" width="80" height="41" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1wsf9m8_di" bpmnElement="Event_0belaay">
         <dc:Bounds x="1012" y="452" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1dw1bln_di" bpmnElement="Event_1cdjzdt">
+        <dc:Bounds x="1012" y="372" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0nhr7lu_di" bpmnElement="Flow_0nhr7lu">
         <di:waypoint x="218" y="430" />
@@ -387,10 +381,6 @@ This is a reminder to complete the task assigned to you. Please log in to your p
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1xk7jj0_di" bpmnElement="Flow_1xk7jj0">
         <di:waypoint x="870" y="430" />
-        <di:waypoint x="905" y="430" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0d96q6r_di" bpmnElement="Flow_0d96q6r">
-        <di:waypoint x="955" y="430" />
         <di:waypoint x="980" y="430" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1648bzm_di" bpmnElement="Flow_1648bzm">
@@ -440,7 +430,7 @@ This is a reminder to complete the task assigned to you. Please log in to your p
         <di:waypoint x="2750" y="430" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="BPMNEdge_06ca94j" bpmnElement="Flow_16n51qr">
-        <di:waypoint x="2990" y="430" />
+        <di:waypoint x="3000" y="430" />
         <di:waypoint x="3035" y="430" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="BPMNEdge_0tum5sj" bpmnElement="Flow_1yxcskc">
@@ -453,7 +443,7 @@ This is a reminder to complete the task assigned to you. Please log in to your p
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="BPMNEdge_1nitz4f" bpmnElement="Flow_1clbtq7">
         <di:waypoint x="2850" y="430" />
-        <di:waypoint x="2890" y="430" />
+        <di:waypoint x="2900" y="430" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="BPMNEdge_02t8jp9" bpmnElement="Flow_14ktsp8">
         <di:waypoint x="3630" y="430" />
@@ -483,14 +473,15 @@ This is a reminder to complete the task assigned to you. Please log in to your p
         <di:waypoint x="1080" y="430" />
         <di:waypoint x="1440" y="430" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="TextAnnotation_130cskq_di" bpmnElement="TextAnnotation_130cskq">
-        <dc:Bounds x="1270" y="510" width="99.99999794078421" height="98.51551956815113" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_04s1nn0_di" bpmnElement="TextAnnotation_04s1nn0">
-        <dc:Bounds x="1850" y="610" width="80" height="41" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0ccd89h_di" bpmnElement="Association_0ccd89h">
+        <di:waypoint x="1260" y="430" />
+        <di:waypoint x="1320" y="430" />
+        <di:waypoint x="1320" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0zr18yo_di" bpmnElement="Association_0zr18yo">
+        <di:waypoint x="1880" y="430" />
+        <di:waypoint x="1880" y="610" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

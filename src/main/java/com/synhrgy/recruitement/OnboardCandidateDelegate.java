@@ -7,14 +7,13 @@ import javax.xml.soap.*;
 import java.net.URL;
 
 public class OnboardCandidateDelegate implements JavaDelegate {
-    private static final String SOAP_API_URL = System.getenv("ONBOARDING_SERVICE_URL") != null
-            ? System.getenv("ONBOARDING_SERVICE_URL")
-            : "http://127.0.0.1:8000";
+    private static final String SOAP_API_URL = "http://localhost:4004";
+
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
         // Fetch the employee ID from process variables
-        String employeeId = (String) execution.getVariable("employeeId");
+        String employeeId = (String) execution.getVariable("applicationId");
 
         if (employeeId == null) {
             throw new IllegalArgumentException("Employee ID is missing from process variables.");
@@ -61,7 +60,10 @@ public class OnboardCandidateDelegate implements JavaDelegate {
         // Send the request to the SOAP API and get the response
         URL endpoint = new URL(SOAP_API_URL);
         SOAPMessage soapResponse = soapConnection.call(soapMessage, endpoint);
-
+        // Print the SOAP response
+        System.out.println("SOAP Response:");
+        soapResponse.writeTo(System.out);
+        System.out.println();        
         // Close the SOAP connection
         soapConnection.close();
 
@@ -73,5 +75,14 @@ public class OnboardCandidateDelegate implements JavaDelegate {
 
         // Extract the response content
         return responseBody.getTextContent();
+    }
+
+    public static void main(String[] args) {
+        OnboardCandidateDelegate delegate = new OnboardCandidateDelegate();
+        try {
+            delegate.callOnboardingService("12");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

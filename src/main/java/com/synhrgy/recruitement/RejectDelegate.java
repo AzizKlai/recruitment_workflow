@@ -58,7 +58,7 @@ public class RejectDelegate implements JavaDelegate {
         String subject = "Application Status Update";
         String body = "Dear Applicant,\n\nWe regret to inform you that your application has not met the required qualifications.\n\nThank you for your interest.\n\nBest regards,\nRecruitment Team";
 
-        sendEmail(email, subject, body);
+        sendEmail("mohamedaziz.klai@insat.ucar.tn", subject, body);
     }
 
     private static void sendEmail(String recipientEmail, String subject, String body) throws Exception {
@@ -66,7 +66,7 @@ public class RejectDelegate implements JavaDelegate {
             // Load environment variables from .env file
             //Dotenv dotenv = Dotenv.load();
             //String postmarkApiKey = dotenv.get("POSTMARK_API_KEY");
-            String postmarkApiKey = "15654fd9-38c7-4eee-bbd2-61e3bd74b6fa";
+            String postmarkApiKey = "a4c65876-716d-4202-864c-0df9d87357d5";
             // API Endpoint
             String postmarkEndpoint = "https://api.postmarkapp.com/email";
     
@@ -145,5 +145,7 @@ public class RejectDelegate implements JavaDelegate {
 
         sendEmail("mohamedaziz.klai@insat.ucar.tn", subject, body);
     }
+
+    
         
 }

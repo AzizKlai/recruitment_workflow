@@ -32,7 +32,7 @@ public class AcceptCandidateDelegate implements JavaDelegate {
         String subject = "Application Accepted";
         String body = "Dear Applicant,\n\nWe are pleased to inform you that your application has been accepted.\n\n" +
                       "Welcome aboard!\n\nBest regards,\nRecruitment Team";
-        sendEmail(email, subject, body);
+        sendEmail("mohamedaziz.klai@insat.ucar.tn", subject, body);
     }
 
     private void updateApplicationStatus(String applicationId, String status) throws Exception {
